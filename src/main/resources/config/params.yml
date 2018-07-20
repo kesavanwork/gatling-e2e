@@ -1,0 +1,8 @@
+paramEnvironments:
+  local:
+    url: http://10.112.106.238
+    mainPort: 7000
+    bank01InPort: 7991
+    bank02InPort: 7992
+    bank01OutPort: 7991
+    bank01OutPort: 7991

@@ -1,0 +1,103 @@
+plugins {
+    id 'java'
+}
+
+apply plugin: 'scala'
+apply plugin: 'idea'
+
+
+version '1.0-SNAPSHOT'
+dependencies {
+    compile ('org.scala-lang:scala-library:2.12.6')
+    compile ('org.scala-lang:scala-compiler:2.12.6')
+    compile 'com.google.guava:guava:18.0'
+    compile 'org.yaml:snakeyaml:1.19'
+    compile group: 'io.gatling', name: 'gatling-core', version: '2.3.1'
+    compile 'io.gatling.highcharts:gatling-charts-highcharts:2.3.1'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    maven { url "http://10.105.32.4:8081/nexus/content/groups/public"}
+    jcenter()
+}
+
+task showConfigurations {
+    doLast {
+        configurations.all {conf -> println(conf)}
+    }
+}
+
+task run(type: JavaExec, dependsOn: classes) {
+    main = 'Main'
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.runtime
+}
+
+
+task nftBasicAdaptorTest(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    main = 'io.gatling.app.Gatling'
+
+    jvmArgs '-DdurationOfTest=1'
+    jvmArgs '-DtargetEnvironment=local'
+    jvmArgs '-Djava.net.preferIPv4Stack=true'
+    jvmArgs '-XX:MaxMetaspaceSize=128m'
+
+    maxHeapSize = "1G"
+
+    args '-m'
+    args '-nr'
+    args '-bf', 'build/classes/scala/main'
+    args '-rf', 'results'
+    args '-s', 'simulations.Adaptor.BasicAdaptorTestSimulation'
+}
+
+
+configurations {
+    gatling
+}
+
+sourceSets {
+    simulations {
+        scala {
+            srcDirs = ['simulations/Adaptor/']
+        }
+        resources {
+            srcDirs = ['simulations/resources']
+        }
+        compileClasspath += configurations.gatling
+    }
+}
+
+task gatlingRunBasicAdaptorSimulation(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "io.gatling.app.Gatling"
+
+//    jvmArgs '-Dduration=1'
+
+    args '-m'
+    args '-bf', 'build/classes/scala/main'
+    args '-rf', 'build/results'
+    args '-s', 'simulations/Adaptor/BasicAdaptorTestSimulation'
+
+//
+//    description = 'Runing Adaptor gatling test simulation'
+//    new File("${buildDir}/reports/gatling").mkdirs()
+//    classpath = sourceSets.simulations.runtimeClasspath + configurations.gatling
+//
+//    args = ['-s', 'simulations.Adaptor/BasicAdaptorTestSimulation',
+//            '-sf', 'simulations.Adaptor/resources',
+//            '-df', 'simulations.Adaptor/resources',
+//            '-rf', "${buildDir}/reports/gatling"
+//    ]
+}
+
+task "hello-world" {
+    doLast {
+        println("Hello World")
+    }
+}
